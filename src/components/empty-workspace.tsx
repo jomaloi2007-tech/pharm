@@ -1,0 +1,11 @@
+"use client";
+
+import { ArrowRight, Download, FileSpreadsheet, Grid3X3, Sparkles, UploadCloud } from "lucide-react";
+
+export default function EmptyWorkspace({ onImport }: { onImport: () => void }) {
+  return <div className="onboarding-workspace">
+    <div className="page-kicker"><span className="kicker-dot" />РАБОЧЕЕ ПРОСТРАНСТВО</div>
+    <div className="onboarding-hero surface"><div className="onboarding-copy"><span className="onboarding-label"><Sparkles size={15} />ГОТОВО К ВАШИМ ДАННЫМ</span><h1>Начните с Excel.<br /><span>Остальное мы посчитаем.</span></h1><p>Загрузите файл с остатками аптек и показателями ABC/XYZ. Мы сохраним ваши аптеки, покажем объём запасов в матрице и найдём товары для перемещения из C/Z в A/X.</p><div className="onboarding-actions"><button className="btn btn-primary" onClick={onImport}><UploadCloud size={18} />Загрузить первый Excel <ArrowRight size={16} /></button><a className="btn btn-secondary" href="/api/export?template=1"><Download size={17} />Пустой шаблон</a></div><span className="onboarding-footnote">Никаких демонстрационных данных — только ваши файлы.</span></div><div className="onboarding-art" aria-hidden="true"><div className="onboarding-art-caption"><span><FileSpreadsheet size={17} /></span>Ваши аптеки <ArrowRight size={15} /> Матрица ABC/XYZ</div><div className="onboarding-art-grid">{["AX", "AY", "AZ", "BX", "BY", "BZ", "CX", "CY", "CZ"].map((key) => <span className={`onboarding-art-cell onboarding-art-cell--${key.toLowerCase()}`} key={key}><b>{key[0]}/{key[1]}</b><i /></span>)}</div><div className="onboarding-art-footer"><Grid3X3 size={15} />Матрица заполнится после импорта</div></div></div>
+    <div className="onboarding-steps"><div><span className="onboarding-step-icon"><FileSpreadsheet size={19} /></span><div><strong>01 · Загрузите данные</strong><p>Один файл для нескольких аптек или отдельные листы по точкам.</p></div></div><div><span className="onboarding-step-icon"><Grid3X3 size={19} /></span><div><strong>02 · Изучите матрицу</strong><p>Количество товаров и упаковок по каждому классу ABC/XYZ.</p></div></div><div><span className="onboarding-step-icon"><ArrowRight size={19} /></span><div><strong>03 · Переместите товар</strong><p>Создайте план для совпадений C/Z → A/X и выгрузите результат.</p></div></div></div>
+  </div>;
+}
