@@ -6,7 +6,7 @@
     "build": "npx drizzle-kit migrate && next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
     "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
@@ -33,6 +33,6 @@
     "typescript": "5.9.3"
   },
   "engines": {
-  "node": "22.x"
-}
+    "node": "22.x"
+  }
 }
