@@ -56,7 +56,7 @@ async function completeTransfer(id: number) {
       pharmacyId: movement.toPharmacyId,
       productId: movement.productId,
       quantity: String(movement.quantity),
-      minStock: 0,
+      minStock: "0",
       abc: "B",
       xyz: "Y",
     }).onConflictDoUpdate({
