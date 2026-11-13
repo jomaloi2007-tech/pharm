@@ -97,10 +97,13 @@ export async function POST(request: Request) {
           batchId: batch.id, pharmacyId: item.pharmacyId!, abc: item.abc!, xyz: item.xyz!, positions: 0, units: 0,
         };
         cell.positions += 1;
-        cell.units += item.quantity ?? 0;
+        cell.units += Number(item.quantity ?? 0);
         matrix.set(key, cell);
       }
-      await tx.insert(importMatrix).values([...matrix.values()]);
+      await tx.insert(importMatrix).values([...matrix.values()].map(cell => ({
+  ...cell,
+  units: String(cell.units)
+})));
       return { imported: values.length, pharmacies: productsByStore.size, units: totalUnits };
     });
     return Response.json({ ok: true, ...result, data: await getAppData() });
