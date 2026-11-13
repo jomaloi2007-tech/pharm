@@ -56,9 +56,9 @@ export async function POST(request: Request) {
           productIds.set(row.sku, productId);
         }
         stock.set(`${pharmacyId}:${productId}`, {
-          pharmacyId, productId, quantity: row.quantity, minStock: row.minStock,
-          abc: row.abc, xyz: row.xyz, updatedAt: new Date(),
-        });
+  pharmacyId, productId, quantity: String(row.quantity), minStock: String(row.minStock),
+  abc: row.abc, xyz: row.xyz, updatedAt: new Date(),
+});
         const storeProducts = productsByStore.get(pharmacyId) ?? new Set<number>();
         storeProducts.add(productId);
         productsByStore.set(pharmacyId, storeProducts);
