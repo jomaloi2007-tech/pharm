@@ -23,6 +23,7 @@ export const inventory = pgTable("inventory", {
   id: serial("id").primaryKey(),
   pharmacyId: integer("pharmacy_id").notNull().references(() => pharmacies.id, { onDelete: "cascade" }),
   productId: integer("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  batchId: integer("batch_id").references(() => importBatches.id, { onDelete: "set null" }),
   quantity: numeric("quantity", { precision: 10, scale: 3 }).notNull().default("0"),
   minStock: numeric("min_stock", { precision: 10, scale: 3 }).notNull().default("0"),
   abc: varchar("abc", { length: 1 }).notNull().default("B"),
