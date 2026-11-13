@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         });
       }
 
-      const totalUnits = values.reduce((sum, item) => sum + (item.quantity ?? 0), 0);
+      const totalUnits = values.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0);
       const [batch] = await tx.insert(importBatches).values({
         filename: file.name.slice(0, 255), rowsImported: values.length,
         pharmaciesCount: productsByStore.size,
