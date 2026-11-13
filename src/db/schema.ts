@@ -1,4 +1,4 @@
-import { bigint, integer, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { bigint, integer, numeric, pgTable, serial, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 export const pharmacies = pgTable("pharmacies", {
   id: serial("id").primaryKey(),
