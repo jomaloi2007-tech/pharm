@@ -87,7 +87,7 @@ export async function POST(request: Request) {
         filename: file.name.slice(0, 255), rowsImported: values.length,
         pharmaciesCount: productsByStore.size,
         productsCount: new Set(values.map((item) => item.productId)).size,
-        totalUnits, fileSize: file.size,
+        totalUnits: String(totalUnits), fileSize: file.size,
       }).returning({ id: importBatches.id });
 
       const matrix = new Map<string, { batchId: number; pharmacyId: number; abc: string; xyz: string; positions: number; units: number }>();
