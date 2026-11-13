@@ -17,12 +17,14 @@ export async function POST(request: Request) {
     }
     const pharmacyName = String(form.get("pharmacyName") ?? "").trim().slice(0, 160);
     const rows = await parseExcel(file as File, pharmacyName);
+    
     const result = await db.transaction(async (tx) => {
       const storeIds = new Map<string, number>();
       const productIds = new Map<string, number>();
       const stock = new Map<string, typeof inventory.$inferInsert>();
       const productsByStore = new Map<number, Set<number>>();
 
+      // 1. Обрабатываем строки из Excel
       for (const row of rows) {
         let pharmacyId = storeIds.get(row.pharmacyCode);
         if (!pharmacyId) {
@@ -55,41 +57,50 @@ export async function POST(request: Request) {
           productId = product.id;
           productIds.set(row.sku, productId);
         }
+        
         stock.set(`${pharmacyId}:${productId}`, {
-  pharmacyId, productId, quantity: String(row.quantity), minStock: String(row.minStock),
-  abc: row.abc, xyz: row.xyz, updatedAt: new Date(),
-});
+          pharmacyId, productId, quantity: String(row.quantity), minStock: String(row.minStock),
+          abc: row.abc, xyz: row.xyz, updatedAt: new Date(),
+        });
+        
         const storeProducts = productsByStore.get(pharmacyId) ?? new Set<number>();
         storeProducts.add(productId);
         productsByStore.set(pharmacyId, storeProducts);
       }
 
-      // Every uploaded pharmacy is a complete snapshot. Other pharmacies are untouched.
+      // 2. Удаляем старые позиции, которых нет в новом файле
       for (const [pharmacyId, storeProducts] of productsByStore) {
         await tx.delete(inventory).where(and(
           eq(inventory.pharmacyId, pharmacyId),
           notInArray(inventory.productId, [...storeProducts]),
         ));
       }
+
+      // 3. СНАЧАЛА создаем батч (запись о загрузке файла)
+      const totalUnits = [...stock.values()].reduce((sum, item) => sum + Number(item.quantity ?? 0), 0);
+      const [batch] = await tx.insert(importBatches).values({
+        filename: file.name.slice(0, 255), rowsImported: stock.size,
+        pharmaciesCount: productsByStore.size,
+        productsCount: new Set([...stock.values()].map((item) => item.productId)).size,
+        totalUnits: String(totalUnits), fileSize: file.size,
+      }).returning({ id: importBatches.id });
+
+      // 4. ТЕПЕРЬ сохраняем остатки, привязывая их к созданному batch.id
       const values = [...stock.values()];
       for (let index = 0; index < values.length; index += 250) {
-        await tx.insert(inventory).values(values.slice(index, index + 250)).onConflictDoUpdate({
+        const chunk = values.slice(index, index + 250).map(v => ({ ...v, batchId: batch.id }));
+        
+        await tx.insert(inventory).values(chunk).onConflictDoUpdate({
           target: [inventory.pharmacyId, inventory.productId],
           set: {
             quantity: sql`excluded.quantity`, minStock: sql`excluded.min_stock`,
             abc: sql`excluded.abc`, xyz: sql`excluded.xyz`, updatedAt: new Date(),
+            batchId: sql`excluded.batch_id`, // Обновляем привязку к файлу
           },
         });
       }
 
-      const totalUnits = values.reduce((sum, item) => sum + Number(item.quantity ?? 0), 0);
-      const [batch] = await tx.insert(importBatches).values({
-        filename: file.name.slice(0, 255), rowsImported: values.length,
-        pharmaciesCount: productsByStore.size,
-        productsCount: new Set(values.map((item) => item.productId)).size,
-        totalUnits: String(totalUnits), fileSize: file.size,
-      }).returning({ id: importBatches.id });
-
+      // 5. Сохраняем матрицу ABC/XYZ
       const matrix = new Map<string, { batchId: number; pharmacyId: number; abc: string; xyz: string; positions: number; units: number }>();
       for (const item of values) {
         const key = `${item.pharmacyId}:${item.abc}:${item.xyz}`;
@@ -100,12 +111,15 @@ export async function POST(request: Request) {
         cell.units += Number(item.quantity ?? 0);
         matrix.set(key, cell);
       }
+      
       await tx.insert(importMatrix).values([...matrix.values()].map(cell => ({
-  ...cell,
-  units: String(cell.units)
-})));
+        ...cell,
+        units: String(cell.units)
+      })));
+
       return { imported: values.length, pharmacies: productsByStore.size, units: totalUnits };
     });
+    
     return Response.json({ ok: true, ...result, data: await getAppData() });
   } catch (error) {
     if (error instanceof AppError) return Response.json({ error: error.message }, { status: error.status });
