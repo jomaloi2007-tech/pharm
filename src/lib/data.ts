@@ -15,12 +15,18 @@ export async function getAppData(): Promise<AppData> {
   ]);
   const stores: Pharmacy[] = storeRows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
   const catalog: Product[] = productRows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
-  const stock: InventoryItem[] = stockRows.map((row) => ({ ...row, updatedAt: row.updatedAt.toISOString() }));
+  const stock: InventoryItem[] = stockRows.map((row) => ({
+  ...row,
+  quantity: Number(row.quantity),
+  minStock: Number(row.minStock),
+  updatedAt: row.updatedAt.toISOString(),
+}));
   const movements: Transfer[] = transferRows.map((row) => ({
-    ...row,
-    createdAt: row.createdAt.toISOString(),
-    completedAt: row.completedAt?.toISOString() ?? null,
-  }));
+  ...row,
+  quantity: Number(row.quantity),
+  createdAt: row.createdAt.toISOString(),
+  completedAt: row.completedAt?.toISOString() ?? null,
+}));
   const imports: ImportBatch[] = importRows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
   const matrixSnapshots: MatrixSnapshot[] = matrixRows;
   return {
