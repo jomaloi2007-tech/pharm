@@ -38,17 +38,17 @@ function cellValue(cell: ExcelJS.Cell): string {
 
 const aliases: Record<string, string[]> = {
   pharmacyCode: ["кодаптеки", "кодфилиала", "storecode", "pharmacycode"],
-  pharmacyName: ["аптека", "филиал", "точка", "наименованиеаптеки", "pharmacy", "store"],
+  pharmacyName: ["аптека", "филиал", "Группа отделов", "наименованиеаптеки", "pharmacy", "store"],
   city: ["город", "city"],
   address: ["адрес", "address"],
   sku: ["артикул", "sku", "кодтовара", "штрихкод", "productcode"],
-  productName: ["товар", "наименование", "наименованиетовара", "препарат", "product"],
+  productName: ["товар", "наименование", "наименованиетовара", "препарат", "названиетовара"],
   category: ["категория", "category"],
   manufacturer: ["производитель", "manufacturer"],
   price: ["цена", "ценаруб", "price"],
   abc: ["abc", "авс", "классabc", "группаabc"],
   xyz: ["xyz", "классxyz", "группаxyz"],
-  quantity: ["остаток", "количество", "остатокшт", "колво", "qty", "quantity"],
+  quantity: ["остаток", "количество", "текущийзапасшт", "колво", "qty", "quantity"],
   minStock: ["минзапас", "минимальныйзапас", "минимум", "minstock"],
 };
 
