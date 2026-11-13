@@ -126,13 +126,21 @@ export async function parseExcel(file: File, fallbackPharmacy = ""): Promise<Imp
       const pharmacyCode = get("pharmacyCode");
       const productName = get("productName");
       const sku = get("sku");
-      const abc = get("abc").toUpperCase().trim().replaceAll("А", "A").replaceAll("В", "B").replaceAll("С", "C");
+            const abc = get("abc").toUpperCase().trim().replaceAll("А", "A").replaceAll("В", "B").replaceAll("С", "C");
       const xyz = get("xyz").toUpperCase().trim().replaceAll("Х", "X").replaceAll("У", "Y").replaceAll("З", "Z");
       const quantityText = get("quantity");
+      
+      // Если строка полностью пустая — пропускаем
       if (![productName, sku, abc, xyz, quantityText].some(Boolean)) continue;
-      if ((!pharmacyName && !pharmacyCode) || (!productName && !sku)) throw new AppError(`Лист «${sheetName}», строка ${index}: укажите аптеку и товар`);
+      
+      // Если нет аптеки или товара — это ошибка
+      if ((!pharmacyName && !pharmacyCode) || (!productName && !sku)) {
+        throw new AppError(`Лист «${sheetName}», строка ${index}: укажите аптеку и товар`);
+      }
+      
+      // Если ABC или XYZ пустые (или содержат недопустимые символы) — просто пропускаем строку
       if (!["A", "B", "C"].includes(abc) || !["X", "Y", "Z"].includes(xyz)) {
-        throw new AppError(`Лист «${sheetName}», строка ${index}: ABC должен быть A/B/C, а XYZ — X/Y/Z`);
+        continue; // <-- ВМЕСТО ОШИБКИ ПРОСТО ПРОПУСКАЕМ
       }
       const quantity = numberValue(quantityText, "Остаток", index);
       const minStockText = get("minStock");
