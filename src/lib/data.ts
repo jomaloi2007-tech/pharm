@@ -27,8 +27,16 @@ export async function getAppData(): Promise<AppData> {
   createdAt: row.createdAt.toISOString(),
   completedAt: row.completedAt?.toISOString() ?? null,
 }));
-  const imports: ImportBatch[] = importRows.map((row) => ({ ...row, createdAt: row.createdAt.toISOString() }));
-  const matrixSnapshots: MatrixSnapshot[] = matrixRows;
+    const imports: ImportBatch[] = importRows.map((row) => ({ 
+    ...row, 
+    totalUnits: Number(row.totalUnits), 
+    createdAt: row.createdAt.toISOString() 
+  }));
+  
+  const matrixSnapshots: MatrixSnapshot[] = matrixRows.map((row) => ({
+    ...row,
+    units: Number(row.units)
+  }));
   return {
     pharmacies: stores,
     products: catalog,
