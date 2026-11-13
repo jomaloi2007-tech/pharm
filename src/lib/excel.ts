@@ -66,7 +66,8 @@ function columnsFor(row: ExcelJS.Row) {
 function numberValue(value: string, field: string, row: number) {
   const cleaned = value.replace(/[\s\u00a0]/g, "").replace(",", ".");
   const parsed = Number(cleaned);
-  if (!cleaned || !Number.isFinite(parsed) || parsed < 0 || !Number.isInteger(parsed) || parsed > 10000000) {
+  // Удаляем условие !Number.isInteger(parsed)
+  if (!cleaned || !Number.isFinite(parsed) || parsed < 0 || parsed > 10000000) {
     throw new AppError(`Строка ${row}: некорректное значение «${field}»`);
   }
   return parsed;
